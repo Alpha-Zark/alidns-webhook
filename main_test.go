@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
+	"alidns-webhook/alidns"
 	"github.com/cert-manager/cert-manager/test/acme"
-	"github.com/pragkent/alidns-webhook/alidns"
 )
 
 var (

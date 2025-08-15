@@ -1,11 +1,10 @@
 package main
 
 import (
-	"os"
-
+	"alidns-webhook/alidns"
 	"github.com/cert-manager/cert-manager/pkg/acme/webhook/cmd"
-	"github.com/pragkent/alidns-webhook/alidns"
 	"k8s.io/klog"
+	"os"
 )
 
 func main() {
