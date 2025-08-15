@@ -3,18 +3,17 @@ package alidns
 import (
 	"context"
 	"fmt"
-	"strings"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/auth/credentials"
-	"github.com/jetstack/cert-manager/pkg/acme/webhook"
-	v1alpha1 "github.com/jetstack/cert-manager/pkg/acme/webhook/apis/acme/v1alpha1"
-	cmmetav1 "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
-	"github.com/jetstack/cert-manager/pkg/issuer/acme/dns/util"
+	"github.com/cert-manager/cert-manager/pkg/acme/webhook"
+	cmwebhook "github.com/cert-manager/cert-manager/pkg/acme/webhook/apis/acme/v1alpha1"
+	cmmetav1 "github.com/cert-manager/cert-manager/pkg/apis/meta/v1"
+	"github.com/cert-manager/cert-manager/pkg/issuer/acme/dns/util"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/klog"
+	"strings"
 )
 
 func NewSolver() webhook.Solver {
@@ -23,7 +22,7 @@ func NewSolver() webhook.Solver {
 
 // Solver implements the provider-specific logic needed to
 // 'present' an ACME challenge TXT record for your own DNS provider.
-// To do so, it must implement the `github.com/jetstack/cert-manager/pkg/acme/webhook.Solver`
+// To do so, it must implement the `github.com/cert-manager/cert-manager/pkg/acme/webhook.Solver`
 // interface.
 type Solver struct {
 	client *kubernetes.Clientset
@@ -44,7 +43,7 @@ func (s *Solver) Name() string {
 // This method should tolerate being called multiple times with the same value.
 // cert-manager itself will later perform a self check to ensure that the
 // solver has correctly configured the DNS provider.
-func (s *Solver) Present(ch *v1alpha1.ChallengeRequest) error {
+func (s *Solver) Present(ch *cmwebhook.ChallengeRequest) error {
 	klog.Infof("Presenting txt record: %v %v", ch.ResolvedFQDN, ch.ResolvedZone)
 	client, err := s.newClientFromChallenge(ch)
 	if err != nil {
@@ -68,7 +67,7 @@ func (s *Solver) Present(ch *v1alpha1.ChallengeRequest) error {
 	return nil
 }
 
-func (s *Solver) newClientFromChallenge(ch *v1alpha1.ChallengeRequest) (*Client, error) {
+func (s *Solver) newClientFromChallenge(ch *cmwebhook.ChallengeRequest) (*Client, error) {
 	cfg, err := loadConfig(ch.Config)
 	if err != nil {
 		return nil, err
@@ -104,7 +103,7 @@ func (s *Solver) getCredential(cfg *Config, ns string) (*credentials.AccessKeyCr
 }
 
 func (s *Solver) getSecretData(selector cmmetav1.SecretKeySelector, ns string) ([]byte, error) {
-	secret, err := s.client.CoreV1().Secrets(ns).Get(context.TODO(),selector.Name, metav1.GetOptions{})
+	secret, err := s.client.CoreV1().Secrets(ns).Get(context.TODO(), selector.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to load secret %q", ns+"/"+selector.Name)
 	}
@@ -122,7 +121,7 @@ func (s *Solver) getSecretData(selector cmmetav1.SecretKeySelector, ns string) (
 // value provided on the ChallengeRequest should be cleaned up.
 // This is in order to facilitate multiple DNS validations for the same domain
 // concurrently.
-func (s *Solver) CleanUp(ch *v1alpha1.ChallengeRequest) error {
+func (s *Solver) CleanUp(ch *cmwebhook.ChallengeRequest) error {
 	klog.Infof("Cleaning up txt record: %v %v", ch.ResolvedFQDN, ch.ResolvedZone)
 	client, err := s.newClientFromChallenge(ch)
 	if err != nil {
