@@ -8,9 +8,7 @@ ENV GO111MODULE=on
 COPY go.mod .
 COPY go.sum .
 
-RUN go clean -modcache
 RUN go mod download
-RUN go mod tidy
 
 FROM build_deps AS build
 
