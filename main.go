@@ -10,9 +10,7 @@ import (
 func main() {
 	groupName := os.Getenv("GROUP_NAME")
 	if groupName == "" {
-		groupName = "alidns.acme.cert-manager.io"
-		klog.Infof("GROUP_NAME not set, using default: %s", groupName)
-		//klog.Fatal("GROUP_NAME must be specified")
+		klog.Fatal("GROUP_NAME must be specified")
 	}
 
 	// This will register our custom DNS provider with the webhook serving
